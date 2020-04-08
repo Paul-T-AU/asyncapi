@@ -1,0 +1,84 @@
+asyncapi: '2.0.0'
+info:
+  title: test asyncapi
+  version: '1.0.0'
+  description: My test
+
+servers:
+  dev:
+    url: https://sqs.{regionEndpoint}.amazonaws.com/
+    protocol: SQS
+    protocolVersion: '0.2.0'
+    security:
+      - apiKey: []
+    variables:
+      regionEndpoint:
+        default: ap-soautheast-2
+        description: Region location of service
+
+channels:
+  user/signedup:
+    publish:
+      bindings:
+        sqs:
+          version: '0.2.0'
+          is: fifo
+          fifo:
+            name: https://sqs.ap-soautheast-2.amazonaws.com/75555555/msqs-test.fifo
+            orderBy: messageGroupId
+            dedupeBy: messageDuplicationId
+          action: SendMessage
+
+      summary: Publishing test events
+      operationId: pushTestMessage
+      message:
+        payload:
+          type: object
+          properties:
+            id:
+              type: int
+              minimum: 0
+              description: id of message
+            messageBody:
+              type: string
+              description: The body of the message
+
+    subscribe:
+      bindings:
+        sqs:
+          vesion: 0.2.0
+          is: fifo
+          fifo:
+            name: https://sqs.ap-soautheast-2.amazonaws.com/75555555/msqs-test.fifo
+            attributeNames: 
+              - All
+            messageAttributeNames:
+              - myCustomAttribute1
+              - myCustomAttribute2
+            maxNumberOfMessages: 10
+            visibilityTimeout: 20
+            waitTimeSeconds: 2
+            receiveRequestAttemptId: attempt123
+            action: RecieveMessage
+
+      summary: Receive test events
+      operationId: receiveTestMessage
+      message:
+        payload:
+          type: object
+          properties:
+            id:
+              type: int
+              minimum: 0
+              description: id of message
+            messageBody:
+              type: string
+              description: The body of the message
+
+components:
+
+  securitySchemes:
+    apiKey:
+      type: httpApiKey
+      name: Authorization
+      in: header
