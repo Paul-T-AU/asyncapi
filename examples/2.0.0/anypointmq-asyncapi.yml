@@ -1,0 +1,85 @@
+asyncapi: '2.0.0'
+info:
+  title: Anypoint MQ asyncapi
+  version: '1.0.0'
+  description: Draft Anypoint Example Async Definition
+
+servers:
+  sandbox:
+    url: https://mq-{regionID}.anypoint.mulesoft.com/api/v1/organizations/{orgID}/environments/{envID}/destinations
+    description: Anypoint MQ Sandbox Server
+    protocol: anypointMQ
+    protocolVersion: '1.0.0'
+    variables:
+      regionID:
+        description: Region location of service
+      orgID:
+        description: Anypoint Organization Id
+      envID:
+        description: Anypoint envirnoment Id
+
+  production:
+    url: https://mq-{regionID}.anypoint.mulesoft.com/api/v1/organizations/{orgID}/environments/{envID}/destinations
+    description: Anypoint MQ Production Server
+    protocol: anypointMQ
+    protocolVersion: '1.0.0'
+    variables:
+      regionID:
+        description: Region location of service
+      orgID:
+        description: Anypoint Organization Id
+      envID:
+        description: Anypoint envirnoment Id
+   
+channels:
+  /userSignUp/messages:
+    bindings:
+      anypointMQ:
+        version: 1.0.1
+        queueType: fifo
+      
+    subscribe:
+      bindings:
+        anypointMQ:
+          version: 1.0.1
+          pollingTime: 1000
+          batchSize: 1
+          lockTtl: 120000
+          ackType: auto
+
+      operationId: consumeMessages
+      summary: Consumes messages from queue
+      description: Consumes n number of messages from channel
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            messageBody:
+              type: string
+              description: Event Body
+
+
+    publish:
+      bindings:
+          anypointMQ:
+            version: 1.0.1
+            messageGroup: userAction
+            messageId:  10012
+
+      operationId: publishMessages
+      summary: Publish messages to queue
+      description: Publish a message or messages on to queue
+      message:
+        contentType: application/json
+        payload:
+          type: object
+          properties:
+            customAttribute:
+              - attribute1: 123
+              - attribute2: 456
+            messageBody:
+              type: string
+              description: Event Body
+
+
